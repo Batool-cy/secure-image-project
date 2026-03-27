@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SecureImage - Receiver Unit</title>
+    <style>
+        body { background: #050a10; color: white; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .container { background: #101820; padding: 40px; border-radius: 20px; border: 1px solid #1a2a3a; width: 100%; max-width: 450px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
+        h2 { color: #d400ff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        .input-group { text-align: left; margin-bottom: 20px; }
+        label { display: block; color: #888; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; background: #080e15; border: 1px solid #1a2a3a; border-radius: 8px; color: white; box-sizing: border-box; margin-bottom: 5px; }
+        .btn-access { background: #d400ff; color: white; padding: 15px; width: 100%; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 10px; }
+        .btn-access:hover { filter: brightness(1.2); box-shadow: 0 0 20px rgba(212, 0, 255, 0.4); }
+        .back-link { display: inline-block; margin-top: 25px; color: #555; text-decoration: none; font-size: 13px; transition: 0.3s; }
+        .back-link:hover { color: #d400ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="font-size: 10px; color: #d400ff; margin-bottom: 10px; letter-spacing: 2px;">SECURE INBOUND CHANNEL</div>
+        <h2>DECRYPTION LOGIN</h2>
+
+        <form action="/receiver_upload" method="post" enctype="multipart/form-data">
+            <div class="input-group">
+                <label>Encrypted Package (.BIN)</label>
+                <input type="file" name="file" required>
+            </div>
+
+            <div class="input-group">
+                <label>Security Access Token</label>
+                <input type="password" name="key" placeholder="Enter session password" required>
+            </div>
+
+            <button type="submit" class="btn-access">Access Terminal</button>
+        </form>
+
+        <a href="/" class="back-link">← Return to Main Portal</a>
+    </div>
+</body>
+</html>
