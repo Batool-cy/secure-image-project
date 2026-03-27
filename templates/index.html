@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureImage - Enterprise Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --secondary: #d400ff;
+            --bg: #03070b;
+            --card-bg: rgba(16, 24, 32, 0.8);
+        }
+
+        body {
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(212, 0, 255, 0.05) 0%, transparent 40%);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .university-header {
+            position: absolute;
+            top: 30px;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 300;
+        }
+
+        .portal-container {
+            background: var(--card-bg);
+            padding: 60px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            max-width: 850px;
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .portal-container::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 50%; transform: translateX(-50%);
+            width: 150px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.2rem;
+            margin: 10px 0;
+            letter-spacing: 4px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .description {
+            color: #8899a6;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 20px auto 40px;
+            font-weight: 300;
+            text-transform: capitalize;
+        }
+
+        .btn-wrapper {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .nav-card {
+            flex: 1;
+            padding: 30px;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Sender Styling */
+        .btn-sender {
+            border-bottom: 3px solid var(--primary);
+        }
+        .btn-sender:hover {
+            background: rgba(0, 212, 255, 0.05);
+            transform: translateY(-10px);
+            border-color: #fff;
+            box-shadow: 0 15px 30px rgba(0, 212, 255, 0.1);
+        }
+
+        /* Receiver Styling */
+        .btn-receiver {
+            border-bottom: 3px solid var(--secondary);
+        }
+        .btn-receiver:hover {
+            background: rgba(212, 0, 255, 0.05);
+            transform: translateY(-10px);
+            border-color: #fff;
+            box-shadow: 0 15px 30px rgba(212, 0, 255, 0.1);
+        }
+
+        .nav-card h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-card p {
+            font-size: 0.85rem;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        .btn-sender h3 { color: var(--primary); }
+        .btn-receiver h3 { color: var(--secondary); }
+
+        .developer-footer {
+            margin-top: 60px;
+            font-size: 12px;
+            color: #444;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .developer-footer b {
+            color: var(--primary);
+            font-weight: 700;
+            margin-left: 5px;
+        }
+
+        /* Decorative Scanline */
+        .scanline {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(0, 212, 255, 0.1);
+            opacity: 0.1;
+            animation: moveScanline 8s linear infinite;
+        }
+
+        @keyframes moveScanline {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="university-header">
+        Mustansiriyah University | College of Science
+    </div>
+
+    <div class="portal-container">
+        <div class="scanline"></div>
+
+        <h1>SECURE IMAGE SYSTEM</h1>
+
+        <p class="description">
+            Advanced AES & RSA based image security framework featuring high-speed cryptographic processing and integrated brute-force attack simulation.
+        </p>
+
+        <div class="btn-wrapper">
+            <a href="/sender_panel" class="nav-card btn-sender">
+                <h3>Sender Console</h3>
+                <p>Encryption & Statistical Analysis</p>
+            </a>
+
+            <a href="/receiver_panel" class="nav-card btn-receiver">
+                <h3>Receiver Unit</h3>
+                <p>Decryption & Integrity Verification</p>
+            </a>
+        </div>
+
+        <div class="developer-footer">
+            Developed by: <b>Batool Gaafar</b>
+        </div>
+    </div>
+
+</body>
+</html>
