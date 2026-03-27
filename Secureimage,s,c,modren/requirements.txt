@@ -1,0 +1,6 @@
+Flask
+pycryptodome
+Pillow
+numpy
+matplotlib
+gunicorn

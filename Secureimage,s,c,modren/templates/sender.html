@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sender Control Unit - SecureImage</title>
+    <style>
+        body { background: #050a10; color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding-bottom: 50px; }
+        .container { max-width: 1000px; margin: 50px auto; background: #101820; padding: 40px; border-radius: 20px; border: 1px solid #1a2a3a; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+        h2 { color: #00d4ff; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 40px; }
+        .gallery { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
+        .card { background: #000; border: 1px solid #333; padding: 20px; flex: 1; border-radius: 12px; transition: 0.3s; }
+        .card p { font-size: 11px; color: #58a6ff; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
+        img { width: 100%; border-radius: 8px; min-height: 250px; object-fit: contain; background: #0a0a0a; }
+        .btn { padding: 15px 30px; border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; font-size: 13px; text-decoration: none; display: inline-block; }
+        .btn-encrypt { background: #007bff; width: 100%; max-width: 300px; }
+        .btn-analysis { background: #28a745; display: none; }
+        .btn-download { background: #ff8800; display: none; margin-top: 15px; width: 100%; box-sizing: border-box; }
+        .btn-home { background: transparent; border: 1px solid #444; margin-top: 30px; color: #888; }
+        .btn-home:hover { border-color: #00d4ff; color: white; }
+        input[type="file"], input[type="password"] { width: 100%; padding: 12px; margin: 10px 0; background: #080e15; border: 1px solid #1a2a3a; color: white; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📡 Sender Control Panel</h2>
+
+        {% if not orig %}
+        <div style="max-width: 400px; margin: auto;">
+            <form action="/encrypt_start" method="post" enctype="multipart/form-data">
+                <label style="color:#888; font-size:12px;">SELECT SOURCE IMAGE</label>
+                <input type="file" name="image" required>
+                <label style="color:#888; font-size:12px;">CREATE ENCRYPTION KEY (AES-256)</label>
+                <input type="password" name="key" placeholder="Enter secure key..." required>
+                <button type="submit" class="btn btn-encrypt" style="margin-top:20px;">Initialize Secure Channel</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="gallery">
+            <div class="card">
+                <p>[ Original Source Image ]</p>
+                <img src="/static/uploads/{{ orig }}" id="orig_img">
+            </div>
+            <div id="e_sec" class="card" style="display:none;">
+                <p style="color:#ffcc00;">[ Encrypted Result - Noise Preview ]</p>
+                <img id="e_img" src="">
+                <a id="dl_link" href="#" class="btn btn-download">📥 Save Secure File (.bin)</a>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <button id="enc_btn" onclick="runEncryption()" class="btn btn-encrypt">Run Hybrid Encryption</button>
+            <a href="/analysis" id="ana_btn" class="btn btn-analysis">View Statistical Report</a>
+        </div>
+        {% endif %}
+
+        <br>
+        <a href="/" class="btn btn-home">← Back to Main Portal</a>
+    </div>
+
+    <script>
+        async function runEncryption() {
+            const btn = document.getElementById('enc_btn');
+            btn.innerText = "Encrypting via RSA + AES...";
+            btn.disabled = true;
+
+            const response = await fetch('/encrypt_action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ file: "{{ orig }}", key: "{{ key }}" })
+            });
+            const data = await response.json();
+
+            if (data.enc_file) {
+                document.getElementById('e_sec').style.display = "block";
+                document.getElementById('e_img').src = "/static/uploads/" + data.noise_preview + "?t=" + new Date().getTime();
+                document.getElementById('dl_link').href = "/download/" + data.enc_file;
+                document.getElementById('dl_link').style.display = "block";
+                document.getElementById('ana_btn').style.display = "inline-block";
+                btn.innerText = "Encryption Verified";
+            }
+        }
+    </script>
+</body>
+</html>
