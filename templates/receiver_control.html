@@ -29,7 +29,7 @@
         <div class="gallery">
             <div class="card">
                 <p>[ Ciphertext Input - Noise Preview ]</p>
-                <img src="{{ url_for('static', filename='uploads/' + preview) }}" id="preview_img">
+                <img src="data:image/png;base64,{{ preview }}" id="preview_img">
             </div>
             <div id="dec_card" class="card" style="display:none;">
                 <p style="color:#00ffcc;">[ Successfully Decrypted Image ]</p>
@@ -64,8 +64,11 @@
                 const decCard = document.getElementById('dec_card');
                 
                 decCard.style.display = "block";
-                // التعديل هنا: إضافة تيمستامب لضمان عدم تحميل صورة قديمة من الكاش
-                decImg.src = "/static/uploads/" + data.dec_file + "?t=" + new Date().getTime();
+                
+                // التعديل الجوهري هنا: نضع بيانات Base64 القادمة من JSON داخل الـ src مباشرة
+                // هذا يحل مشكلة الـ 401 والـ 404 نهائياً
+                decImg.src = "data:image/png;base64," + data.dec_file;
+                
             } else { 
                 alert("Access Denied: Key mismatch or Unauthorized access."); 
             }
