@@ -84,7 +84,8 @@ def decrypt_action():
 
 @app.route('/download/<filename>')
 def download(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    # نستخدم as_attachment=True لكي يفهم المتصفح أنه تحميل وليس عرض
+    return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
 
 
 if __name__ == '__main__':
