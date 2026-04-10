@@ -10,14 +10,15 @@
         .card { flex: 1; background: #000; padding: 20px; border-radius: 12px; border: 1px solid #333; }
         .card p { font-size: 11px; color: #d400ff; text-transform: uppercase; margin-bottom: 15px; }
         img { width: 100%; border-radius: 8px; min-height: 250px; object-fit: contain; background: #0a0a0a; border: 1px solid #222; }
-        .btn-group { display: flex; justify-content: center; gap: 15px; }
+        .btn-group { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
         .btn { padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
         .btn-dec { background: #d400ff; color: white; }
         .btn-dec:hover { background: #a000c8; }
+        .btn-save { background: transparent; border: 1px solid #00ffcc; color: #00ffcc; }
+        .btn-save:hover { background: #00ffcc; color: black; }
         .btn-brute { background: transparent; border: 1px solid #ff0044; color: #ff0044; }
         .btn-brute:hover { background: #ff0044; color: white; }
 
-        /* Modal for Brute Force Console */
         #bruteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; z-index: 1000; }
         .console-box { width: 500px; background: #000; padding: 25px; border: 2px solid #ff0044; border-radius: 10px; }
         #consoleText { height: 300px; overflow-y: auto; text-align: left; font-family: 'Courier New', monospace; color: #0f0; font-size: 13px; margin-bottom: 20px; }
@@ -38,6 +39,7 @@
         </div>
         <div class="btn-group">
             <button onclick="executeDecryption()" class="btn btn-dec">Execute Decryption</button>
+            <button onclick="downloadNoiseImage()" class="btn btn-save">Save Encrypted Image</button>
             <button onclick="showBruteForce()" class="btn btn-brute">Test RSA Vulnerability</button>
         </div>
         <br><a href="/" style="color:#444; text-decoration:none; display:inline-block; margin-top:20px;">← Back to Main Portal</a>
@@ -52,6 +54,19 @@
     </div>
 
     <script>
+        // دالة حفظ الصورة المشفرة من المتصفح مباشرة لتجنب خطأ 404
+        function downloadNoiseImage() {
+            const img = document.getElementById('preview_img');
+            if (img && img.src.includes('base64')) {
+                const link = document.createElement('a');
+                link.href = img.src;
+                link.download = "Encrypted_Noise.png";
+                link.click();
+            } else {
+                alert("Image data not loaded yet.");
+            }
+        }
+
         async function executeDecryption() {
             const resp = await fetch('/decrypt_action', {
                 method: 'POST',
@@ -62,13 +77,8 @@
             if (data.dec_file) {
                 const decImg = document.getElementById('dec_img');
                 const decCard = document.getElementById('dec_card');
-                
                 decCard.style.display = "block";
-                
-                // التعديل الجوهري هنا: نضع بيانات Base64 القادمة من JSON داخل الـ src مباشرة
-                // هذا يحل مشكلة الـ 401 والـ 404 نهائياً
                 decImg.src = "data:image/png;base64," + data.dec_file;
-                
             } else { 
                 alert("Access Denied: Key mismatch or Unauthorized access."); 
             }
