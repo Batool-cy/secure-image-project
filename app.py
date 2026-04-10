@@ -2,21 +2,17 @@ import os
 import base64
 from flask import Flask, render_template, request, jsonify, send_from_directory
 
-# استيراد الدوال من ملفك الثاني - تأكدي أن اسم الملف هو encryption_logic.py
-try:
-    from encryption_logic import encrypt_image, decrypt_image, calculate_entropy, generate_histogram
-except ImportError:
-    # هذا السطر فقط للتأكد من عدم انهيار السيرفر إذا كان هناك خطأ في ملف اللوجيك
-    pass
-
 app = Flask(__name__)
 
-# إعداد المجلدات بصيغة تناسب سيرفر Linux (مثل Render)
+# إعداد المجلدات بصيغة Linux
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-report_data = {}
+# استيراد الدوال مع معالجة الخطأ
+try:
+    from encryption_logic import encrypt_image, decrypt_image, calculate_entropy, generate_histogram
+except ImportError as e:
+    print(f"Import Error: {e}")
 
 def get_image_base64(filename):
     try:
@@ -24,8 +20,8 @@ def get_image_base64(filename):
         if os.path.exists(path):
             with open(path, "rb") as img_file:
                 return base64.b64encode(img_file.read()).decode('utf-8')
-    except Exception as e:
-        print(f"Error: {e}")
+    except:
+        pass
     return ""
 
 @app.route('/')
@@ -53,23 +49,16 @@ def encrypt_start():
 
 @app.route('/encrypt_action', methods=['POST'])
 def encrypt_action():
-    try:
-        data = request.get_json()
-        orig_name = data['file']
-        user_key = data['key']
-
-        enc_file, noise = encrypt_image(os.path.join(UPLOAD_FOLDER, orig_name), user_key)
-
-        global report_data
-        report_data = {
-            'entropy': calculate_entropy(os.path.join(UPLOAD_FOLDER, enc_file)),
-            'h_orig': generate_histogram(os.path.join(UPLOAD_FOLDER, orig_name), "h_orig.png"),
-            'h_enc': generate_histogram(os.path.join(UPLOAD_FOLDER, enc_file), "h_enc.png")
-        }
-        
-        return jsonify({'enc_file': enc_file, 'noise_preview': get_image_base64(noise)})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    data = request.get_json()
+    orig_name = data['file']
+    user_key = data['key']
+    
+    # تنفيذ التشفير
+    enc_file, noise = encrypt_image(os.path.join(UPLOAD_FOLDER, orig_name), user_key)
+    
+    # نرسل نص الصورة (Base64)
+    noise_data = get_image_base64(noise)
+    return jsonify({'enc_file': enc_file, 'noise_preview': noise_data})
 
 @app.route('/receiver_upload', methods=['POST'])
 def receiver_upload():
@@ -79,19 +68,17 @@ def receiver_upload():
         filename = file.filename
         file.save(os.path.join(UPLOAD_FOLDER, filename))
         preview_name = "preview_" + filename.replace("enc_", "").split('.')[0] + ".png"
-        return render_template('receiver_control.html', enc_file=filename, key=key, preview=get_image_base64(preview_name))
-    return "No file provided"
+        preview_data = get_image_base64(preview_name)
+        return render_template('receiver_control.html', enc_file=filename, key=key, preview=preview_data)
+    return "Error"
 
 @app.route('/decrypt_action', methods=['POST'])
 def decrypt_action():
-    try:
-        data = request.get_json()
-        dec_file_name = decrypt_image(os.path.join(UPLOAD_FOLDER, data['file']), data['key'])
-        if dec_file_name:
-            return jsonify({'dec_file': get_image_base64(dec_file_name)})
-        return jsonify({'error': 'Wrong Key'}), 401
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    data = request.get_json()
+    dec_file_name = decrypt_image(os.path.join(UPLOAD_FOLDER, data['file']), data['key'])
+    if dec_file_name:
+        return jsonify({'dec_file': get_image_base64(dec_file_name)})
+    return jsonify({'error': 'Wrong Key'}), 401
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
