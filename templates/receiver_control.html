@@ -14,38 +14,31 @@
     <button onclick="downloadSecurely()" class="btn" style="background:#00ffcc; color:black;">Save Encrypted Image</button>
 </div>
 
+<button onclick="forceDownload()" class="btn" style="background:#00ffcc; color:black;">Download Encrypted Image</button>
+
 <script>
-    // دالة التحميل الآمن (تأخذ البيانات من ذاكرة المتصفح)
-    function downloadSecurely() {
-        const img = document.getElementById('preview_img');
-        if (img && img.src.startsWith('data:image')) {
-            const link = document.createElement('a');
-            link.href = img.src;
-            link.download = "Encrypted_Noise_Image.png";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } else {
-            alert("⚠️ لا توجد بيانات صورة صالحة للتحميل حالياً.");
-        }
+function forceDownload() {
+    const img = document.getElementById('preview_img');
+    
+    // فحص: هل الصورة محملة فعلاً؟
+    if (!img || img.src.includes('undefined') || img.src === "") {
+        alert("⚠️ خطأ: بيانات الصورة لم تصل من السيرفر بعد.");
+        return;
     }
 
-    async function executeDecryption() {
-        const resp = await fetch('/decrypt_action', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ file: "{{ enc_file }}", key: "{{ key }}" })
-        });
-        const data = await resp.json();
-        
-        if (data.dec_file) {
-            const decImg = document.getElementById('dec_img');
-            const decCard = document.getElementById('dec_card');
-            decCard.style.display = "block";
-            // عرض الصورة المفكوكة فوراً
-            decImg.src = "data:image/png;base64," + data.dec_file;
-        } else {
-            alert("❌ خطأ: مفتاح فك التشفير غير صحيح أو الوصول مرفوض.");
-        }
+    // فحص: هل البيانات بصيغة Base64؟
+    if (img.src.startsWith('data:image')) {
+        const link = document.createElement('a');
+        link.href = img.src;
+        link.download = "Encrypted_Image_Final.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        alert("✅ بدأ التحميل الآن من ذاكرة المتصفح!");
+    } else {
+        // إذا كان المتصفح يحاول التحميل من رابط قديم
+        alert("⚠️ المتصفح يحاول استخدام رابط قديم، سأحاول التحويل اليدوي...");
+        window.open(img.src, '_blank');
     }
+}
 </script>
