@@ -1,6 +1,12 @@
-<div class="card">
-    <p>[ Ciphertext Input - Noise Preview ]</p>
-    <img src="data:image/png;base64,{{ preview }}" id="preview_img" onerror="this.style.display='none'">
+<div class="gallery">
+    <div class="card">
+        <p>[ Ciphertext Input - Noise Preview ]</p>
+        <img src="data:image/png;base64,{{ preview }}" id="preview_img" onerror="this.src='https://via.placeholder.com/300?text=Encrypted+Data+Stream'">
+    </div>
+    <div id="dec_card" class="card" style="display:none;">
+        <p style="color:#00ffcc;">[ Successfully Decrypted Image ]</p>
+        <img id="dec_img">
+    </div>
 </div>
 
 <div class="btn-group">
@@ -9,7 +15,7 @@
 </div>
 
 <script>
-    // هذه الدالة ستحل مشكلة Not Found نهائياً لأنها تحمل من المتصفح مباشرة
+    // دالة التحميل الآمن (تأخذ البيانات من ذاكرة المتصفح)
     function downloadSecurely() {
         const img = document.getElementById('preview_img');
         if (img && img.src.startsWith('data:image')) {
@@ -20,7 +26,7 @@
             link.click();
             document.body.removeChild(link);
         } else {
-            alert("الصورة غير موجودة حالياً للحفظ");
+            alert("⚠️ لا توجد بيانات صورة صالحة للتحميل حالياً.");
         }
     }
 
@@ -36,10 +42,10 @@
             const decImg = document.getElementById('dec_img');
             const decCard = document.getElementById('dec_card');
             decCard.style.display = "block";
-            // هنا نضع بيانات الـ Base64 القادمة من السيرفر
+            // عرض الصورة المفكوكة فوراً
             decImg.src = "data:image/png;base64," + data.dec_file;
         } else {
-            alert("خطأ في مفتاح التشفير!");
+            alert("❌ خطأ: مفتاح فك التشفير غير صحيح أو الوصول مرفوض.");
         }
     }
 </script>
