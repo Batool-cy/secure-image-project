@@ -4,24 +4,28 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 
 app = Flask(__name__)
 
-# إعداد المجلدات بصيغة Linux
+# إعداد المجلدات
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# استيراد الدوال مع معالجة الخطأ
+# متغير عالمي لتخزين بيانات التحليل للتقارير
+report_data = {}
+
+# استيراد الدوال من ملف البرمجة الخاص بكِ
 try:
     from encryption_logic import encrypt_image, decrypt_image, calculate_entropy, generate_histogram
 except ImportError as e:
-    print(f"Import Error: {e}")
+    print(f"⚠️ Import Error: {e}")
 
+# دالة تحويل الصورة إلى نص Base64 لضمان عرضها على Render
 def get_image_base64(filename):
     try:
         path = os.path.join(UPLOAD_FOLDER, filename)
         if os.path.exists(path):
             with open(path, "rb") as img_file:
                 return base64.b64encode(img_file.read()).decode('utf-8')
-    except:
-        pass
+    except Exception as e:
+        print(f"❌ Base64 Error: {e}")
     return ""
 
 @app.route('/')
@@ -56,7 +60,17 @@ def encrypt_action():
     # تنفيذ التشفير
     enc_file, noise = encrypt_image(os.path.join(UPLOAD_FOLDER, orig_name), user_key)
     
-    # نرسل نص الصورة (Base64)
+    # تحديث بيانات التقرير والرسوم البيانية
+    global report_data
+    try:
+        report_data = {
+            'entropy': calculate_entropy(os.path.join(UPLOAD_FOLDER, enc_file)),
+            'h_orig': generate_histogram(os.path.join(UPLOAD_FOLDER, orig_name), "h_orig.png"),
+            'h_enc': generate_histogram(os.path.join(UPLOAD_FOLDER, enc_file), "h_enc.png")
+        }
+    except: pass
+    
+    # إرسال بيانات الصورة المشوشة كـ Base64
     noise_data = get_image_base64(noise)
     return jsonify({'enc_file': enc_file, 'noise_preview': noise_data})
 
@@ -67,17 +81,24 @@ def receiver_upload():
     if file:
         filename = file.filename
         file.save(os.path.join(UPLOAD_FOLDER, filename))
+        
+        # استنتاج اسم ملف المعاينة وتحويله لـ Base64
         preview_name = "preview_" + filename.replace("enc_", "").split('.')[0] + ".png"
         preview_data = get_image_base64(preview_name)
+        
         return render_template('receiver_control.html', enc_file=filename, key=key, preview=preview_data)
-    return "Error"
+    return "Error: No file uploaded"
 
 @app.route('/decrypt_action', methods=['POST'])
 def decrypt_action():
     data = request.get_json()
+    # فك التشفير باستخدام الدالة الأصلية
     dec_file_name = decrypt_image(os.path.join(UPLOAD_FOLDER, data['file']), data['key'])
+    
     if dec_file_name:
+        # إرسال الصورة المفكوكة كـ Base64 لتعرض فوراً في المتصفح
         return jsonify({'dec_file': get_image_base64(dec_file_name)})
+    
     return jsonify({'error': 'Wrong Key'}), 401
 
 if __name__ == '__main__':
