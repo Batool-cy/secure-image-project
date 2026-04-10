@@ -1,21 +1,27 @@
 <div class="card">
     <p>[ Ciphertext Input - Noise Preview ]</p>
-    <img src="data:image/png;base64,{{ preview }}" id="preview_img">
+    <img src="data:image/png;base64,{{ preview }}" id="preview_img" onerror="this.style.display='none'">
 </div>
 
 <div class="btn-group">
     <button onclick="executeDecryption()" class="btn btn-dec">Execute Decryption</button>
-    <button onclick="saveImage()" class="btn" style="background:#00ffcc; color:black;">Save Encrypted Image</button>
+    <button onclick="downloadSecurely()" class="btn" style="background:#00ffcc; color:black;">Save Encrypted Image</button>
 </div>
 
 <script>
-    // دالة الحفظ التي تحل مشكلة Not Found
-    function saveImage() {
+    // هذه الدالة ستحل مشكلة Not Found نهائياً لأنها تحمل من المتصفح مباشرة
+    function downloadSecurely() {
         const img = document.getElementById('preview_img');
-        const link = document.createElement('a');
-        link.href = img.src;
-        link.download = "encrypted_noise.png";
-        link.click();
+        if (img && img.src.startsWith('data:image')) {
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = "Encrypted_Noise_Image.png";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            alert("الصورة غير موجودة حالياً للحفظ");
+        }
     }
 
     async function executeDecryption() {
@@ -25,10 +31,15 @@
             body: JSON.stringify({ file: "{{ enc_file }}", key: "{{ key }}" })
         });
         const data = await resp.json();
+        
         if (data.dec_file) {
-            document.getElementById('dec_card').style.display = "block";
-            // عرض الصورة المفكوكة باستخدام Base64
-            document.getElementById('dec_img').src = "data:image/png;base64," + data.dec_file;
-        } else { alert("Key mismatch!"); }
+            const decImg = document.getElementById('dec_img');
+            const decCard = document.getElementById('dec_card');
+            decCard.style.display = "block";
+            // هنا نضع بيانات الـ Base64 القادمة من السيرفر
+            decImg.src = "data:image/png;base64," + data.dec_file;
+        } else {
+            alert("خطأ في مفتاح التشفير!");
+        }
     }
 </script>
