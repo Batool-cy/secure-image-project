@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
+import base64
 from encryption_logic import encrypt_image, decrypt_image, calculate_entropy, generate_histogram
 
 app = Flask(__name__)
@@ -67,18 +68,31 @@ def receiver_upload():
     if file:
         filename = file.filename
         file.save(os.path.join(UPLOAD_FOLDER, filename))
-        # استنتاج اسم صورة النويز للمعاينة
-        preview = "preview_" + filename.replace("enc_", "").split('.')[0] + ".png"
-        return render_template('receiver_control.html', enc_file=filename, key=key, preview=preview)
-    return "No file provided"
 
+        # استنتاج اسم صورة النويز (تأكدي أن الاسم يطابق ما تم حفظه في الـ Sender)
+        preview_name = "preview_" + filename.replace("enc_", "").split('.')[0] + ".png"
+
+        # نمرر preview للـ HTML
+        return render_template('receiver_control.html', enc_file=filename, key=key, preview=preview_name)
+    return "No file provided"
 
 @app.route('/decrypt_action', methods=['POST'])
 def decrypt_action():
+    import base64
     data = request.get_json()
-    dec_file = decrypt_image(data['file'], data['key'])
-    if dec_file:
-        return jsonify({'dec_file': dec_file})
+    filename = data.get('file')
+    user_key = data.get('key')
+
+    # نرسل اسم الملف فقط لأن الدالة في encryption_logic هي من تضيف المسار
+    dec_file_name = decrypt_image(filename, user_key)
+
+    if dec_file_name:
+        dec_full_path = os.path.join(UPLOAD_FOLDER, dec_file_name)
+        if os.path.exists(dec_full_path):
+            with open(dec_full_path, "rb") as img_file:
+                encoded_string = base64.b64encode(img_file.read()).decode('utf-8')
+                return jsonify({'dec_file': encoded_string})
+
     return jsonify({'error': 'Unauthorized/Wrong Key'}), 401
 
 
