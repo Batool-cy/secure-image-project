@@ -47,23 +47,44 @@
         <a href="/" class="back-link">← Return to Main Portal</a>
     </div>
 
-    <script>
-        function previewEncryptedImage(event) {
-            const file = event.target.files[0];
-            if (file) {
+   <script>
+    function previewEncryptedImage(event) {
+        const file = event.target.files[0];
+        const previewContainer = document.getElementById('preview-container');
+        const previewImg = document.getElementById('noisePreview');
+
+        if (file) {
+            // إذا كان الملف ينتهي بـ .bin (الملف المشفر)
+            if (file.name.endsWith('.bin')) {
+                // توليد نويز عشوائي باستخدام Canvas
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 250;
+                canvas.height = 250;
+
+                const imageData = ctx.createImageData(canvas.width, canvas.height);
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    imageData.data[i] = Math.random() * 255;     // Red
+                    imageData.data[i+1] = Math.random() * 255;   // Green
+                    imageData.data[i+2] = Math.random() * 255;   // Blue
+                    imageData.data[i+3] = 255;                   // Alpha
+                }
+                ctx.putImageData(imageData, 0, 0);
+
+                // عرض النويز في خانة المعاينة
+                previewImg.src = canvas.toDataURL();
+                previewContainer.style.display = 'block';
+            } else {
+                // إذا كان ملف صورة عادي (اختياري)
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const previewContainer = document.getElementById('preview-container');
-                    const previewImg = document.getElementById('noisePreview');
-
-                    // نضع محتوى الملف في مصدر الصورة
                     previewImg.src = e.target.result;
                     previewContainer.style.display = 'block';
                 }
-                // قراءة الملف كـ DataURL (Base64) ليتمكن المتصفح من رسمه
                 reader.readAsDataURL(file);
             }
         }
-    </script>
+    }
+</script>
 </body>
 </html>
