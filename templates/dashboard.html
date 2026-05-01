@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Dashboard - Analysis</title>
+    <style>
+        body { background: #050a10; color: white; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+
+        /* Image Cards */
+        .image-flow { display: flex; gap: 15px; margin-bottom: 30px; }
+        .img-card { flex: 1; background: #101820; padding: 15px; border-radius: 10px; border: 1px solid #1a2a3a; text-align: center; transition: 0.3s; }
+        .img-card:hover { border-color: #00d4ff; box-shadow: 0 0 15px rgba(0,212,255,0.2); }
+        .img-card img { width: 100%; border-radius: 8px; margin-top: 10px; height: 200px; object-fit: contain; background: #000; border: 1px solid #1a2a3a; }
+
+        /* Table Styling */
+        .analysis-section { background: #101820; padding: 20px; border-radius: 10px; border: 1px solid #1a2a3a; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: center; }
+        th { color: #00d4ff; text-transform: uppercase; font-size: 13px; padding: 15px; border-bottom: 2px solid #1a2a3a; }
+        td { padding: 15px; border-bottom: 1px solid #1a2a3a; font-family: 'Courier New', monospace; font-size: 16px; }
+        .metric-name { text-align: left; color: #8899a6; font-family: 'Segoe UI', sans-serif; font-weight: bold; font-size: 14px; }
+
+        /* Highlight Colors */
+        .val-secure { color: #ff4b2b; } /* For high entropy/NPCR in encryption */
+        .val-perfect { color: #00ffaa; } /* For 0% NPCR in restoration */
+
+        h2 { color: #00d4ff; border-bottom: 1px solid #1a2a3a; padding-bottom: 10px; text-transform: uppercase; font-size: 14px; margin-top: 30px; letter-spacing: 1px; }
+        small { color: #8899a6; text-transform: uppercase; font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px; }
+
+        .btn-home { display: inline-block; color: #00d4ff; text-decoration: none; border: 1px solid #00d4ff; padding: 12px 30px; border-radius: 5px; transition: 0.3s; font-size: 14px; margin: 40px auto; display: block; width: fit-content; }
+        .btn-home:hover { background: rgba(0,212,255,0.1); box-shadow: 0 0 20px rgba(0,212,255,0.3); }
+        .no-img { height: 200px; display: flex; align-items: center; justify-content: center; color: #444; border: 1px dashed #333; margin-top: 10px; background: #0a0a0a; border-radius: 8px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align:center; color:#00d4ff; margin-bottom: 40px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,212,255,0.5);">🛡️ FULL SECURITY DASHBOARD</h1>
+
+        <h2>1. Image Lifecycle Sequence</h2>
+        <div class="image-flow">
+            <div class="img-card">
+                <small>1. Original Source</small>
+                {% if orig_img %}
+                    <img src="{{ url_for('static', filename='uploads/' + orig_img) }}?v={{ range(1,9999)|random }}" alt="Original">
+                {% else %}
+                    <div class="no-img">No original image</div>
+                {% endif %}
+            </div>
+
+            <div class="img-card">
+                <small>2. Encrypted (AES-256)</small>
+                {% if enc_img %}
+                    <img src="{{ url_for('static', filename='uploads/' + enc_img) }}?v={{ range(1,9999)|random }}" alt="Encrypted">
+                {% else %}
+                    <div class="no-img">Not Encrypted</div>
+                {% endif %}
+            </div>
+
+            <div class="img-card">
+                <small>3. Decrypted (Restored)</small>
+                {% if dec_img %}
+                    <img src="{{ url_for('static', filename='uploads/' + dec_img) }}?v={{ range(1,9999)|random }}" alt="Decrypted">
+                {% else %}
+                    <div class="no-img">Waiting for Decryption...</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <h2>2. Comparative Statistical Report (Triple-Stage)</h2>
+        <div class="analysis-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align: left;">Metric Analysis</th>
+                        <th>Original State</th>
+                        <th>Encrypted State</th>
+                        <th>Restored State</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="metric-name">Information Entropy</td>
+                        <td>{{ orig_entropy if orig_entropy else '0.00' }}</td>
+                        <td class="val-secure">{{ enc_entropy if enc_entropy else '0.00' }}</td>
+                        <td>{{ dec_entropy if dec_entropy else '0.00' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="metric-name">NPCR (Pixel Change Rate)</td>
+                        <td>0.00%</td>
+                        <td class="val-secure">{{ enc_npcr if enc_npcr else '0.00' }}%</td>
+                        <td class="val-perfect">{{ dec_npcr if dec_npcr else '0.00' }}%</td>
+                    </tr>
+                    <tr>
+                        <td class="metric-name">UACI (Intensity Difference)</td>
+                        <td>0.00%</td>
+                        <td class="val-secure">{{ enc_uaci if enc_uaci else '0.00' }}%</td>
+                        <td class="val-perfect">{{ dec_uaci if dec_uaci else '0.00' }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="color: #00d4ff; margin-top: 40px;">⏱️ COMPUTATION RESOURCES (TIME ANALYSIS)</h3>
+<table style="width:100%; border-collapse: collapse; margin-top: 20px; background: #0a1118; border: 1px solid #1a2a3a;">
+    <thead>
+        <tr style="background: #1a2a3a; color: #00ffaa;">
+            <th style="padding: 15px; border: 1px solid #333;">Algorithm</th>
+            <th style="padding: 15px; border: 1px solid #333;">Operation</th>
+            <th style="padding: 15px; border: 1px solid #333;">Target</th>
+            <th style="padding: 15px; border: 1px solid #333;">Execution Time (sec)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="padding: 12px; border: 1px solid #333;"><b>AES-256</b></td>
+            <td style="padding: 12px; border: 1px solid #333;">Encryption</td>
+            <td style="padding: 12px; border: 1px solid #333;">Image Data</td>
+            <td style="padding: 12px; border: 1px solid #333; color: #00ffaa;">{{ aes_enc_time }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 12px; border: 1px solid #333;"><b>RSA-2048</b></td>
+            <td style="padding: 12px; border: 1px solid #333;">Encryption</td>
+            <td style="padding: 12px; border: 1px solid #333;">AES Key</td>
+            <td style="padding: 12px; border: 1px solid #333; color: #00ffaa;">{{ rsa_enc_time }}</td>
+        </tr>
+        <tr style="background: #0d1b2a;">
+            <td style="padding: 12px; border: 1px solid #333;"><b>AES-256</b></td>
+            <td style="padding: 12px; border: 1px solid #333;">Decryption</td>
+            <td style="padding: 12px; border: 1px solid #333;">Image Data</td>
+            <td style="padding: 12px; border: 1px solid #333; color: #ffcc00;">{{ aes_dec_time }}</td>
+        </tr>
+        <tr style="background: #0d1b2a;">
+            <td style="padding: 12px; border: 1px solid #333;"><b>RSA-2048</b></td>
+            <td style="padding: 12px; border: 1px solid #333;">Decryption</td>
+            <td style="padding: 12px; border: 1px solid #333;">AES Key</td>
+            <td style="padding: 12px; border: 1px solid #333; color: #ffcc00;">{{ rsa_dec_time }}</td>
+        </tr>
+    </tbody>
+</table>
+
+        <h2>3. Histogram Stability</h2>
+        <div class="image-flow">
+            <div class="img-card">
+                <small>Original Histogram</small>
+                {% if h_orig %}
+                    <img src="{{ url_for('static', filename='uploads/' + h_orig) }}?v={{ range(1,999)|random }}" style="height: 150px;">
+                {% else %}
+                    <div class="no-img" style="height: 150px;">N/A</div>
+                {% endif %}
+            </div>
+            <div class="img-card">
+                <small>Encrypted (Flat Distribution)</small>
+                {% if h_enc %}
+                    <img src="{{ url_for('static', filename='uploads/' + h_enc) }}?v={{ range(1,999)|random }}" style="height: 150px;">
+                {% else %}
+                    <div class="no-img" style="height: 150px;">N/A</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <a href="/" class="btn-home">← Return to Control Center</a>
+    </div>
+</body>
+</html>
