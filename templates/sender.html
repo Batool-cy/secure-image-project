@@ -8,16 +8,31 @@
         .container { max-width: 1000px; margin: 50px auto; background: #101820; padding: 40px; border-radius: 20px; border: 1px solid #1a2a3a; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
         h2 { color: #00d4ff; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 40px; }
         .gallery { display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
-        .card { background: #000; border: 1px solid #333; padding: 20px; flex: 1; border-radius: 12px; transition: 0.3s; }
+        .card { background: #000; border: 1px solid #333; padding: 20px; flex: 1; border-radius: 12px; transition: 0.3s; position: relative; }
         .card p { font-size: 11px; color: #58a6ff; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
         img { width: 100%; border-radius: 8px; min-height: 250px; object-fit: contain; background: #0a0a0a; }
         .btn { padding: 15px 30px; border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; font-size: 13px; text-decoration: none; display: inline-block; }
         .btn-encrypt { background: #007bff; width: 100%; max-width: 300px; }
-        .btn-analysis { background: #28a745; display: none; }
+        .btn-analysis { background: #28a745; display: none; margin-top: 10px; }
         .btn-download { background: #ff8800; display: none; margin-top: 15px; width: 100%; box-sizing: border-box; }
         .btn-home { background: transparent; border: 1px solid #444; margin-top: 30px; color: #888; }
         .btn-home:hover { border-color: #00d4ff; color: white; }
         input[type="file"], input[type="password"] { width: 100%; padding: 12px; margin: 10px 0; background: #080e15; border: 1px solid #1a2a3a; color: white; border-radius: 8px; }
+
+        /* ستايل اختبار الحساسية الجديد */
+        .sensitivity-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #080e15;
+            border: 1px solid #1a2a3a;
+            border-radius: 10px;
+            display: none; /* يظهر فقط بعد الضغط على التشفير */
+        }
+        .sensitivity-title { color: #00d4ff; font-size: 10px; margin-bottom: 10px; letter-spacing: 1px; font-weight: bold; }
+        .metrics { display: flex; justify-content: space-around; }
+        .metric-item { flex: 1; }
+        .metric-value { color: #00ffcc; font-family: 'Consolas', monospace; font-size: 16px; font-weight: bold; }
+        .metric-label { font-size: 9px; color: #555; display: block; }
     </style>
 </head>
 <body>
@@ -45,13 +60,30 @@
                 <p style="color:#ffcc00;">[ Encrypted Result - Noise Preview ]</p>
                 <img id="e_img" src="">
                 <a id="dl_link" href="#" class="btn btn-download">📥 Save Secure File (.bin)</a>
+
+                <div id="sensitivity_results" class="sensitivity-box">
+                    <div class="sensitivity-title">🔑 KEY SENSITIVITY TEST</div>
+                    <div class="metrics">
+                        <div class="metric-item">
+                            <span class="metric-value" id="npcr_val">0.00%</span>
+                            <span class="metric-label">NPCR</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value" id="uaci_val">0.00%</span>
+                            <span class="metric-label">UACI</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-            <button id="enc_btn" onclick="runEncryption()" class="btn btn-encrypt">Run Hybrid Encryption</button>
-            <a href="/analysis" id="ana_btn" class="btn btn-analysis">View Statistical Report</a>
-        </div>
+     <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+    <button id="enc_btn" onclick="runEncryption()" class="btn btn-encrypt">Run Hybrid Encryption</button>
+
+    <a href="{{ url_for('analysis') }}" id="ana_btn" class="btn btn-analysis" style="display:none; background: #28a745; text-decoration: none; padding: 15px 30px; border-radius: 8px; color: white; font-weight: bold;">
+        📊 View Statistical Report
+    </a>
+</div>
         {% endif %}
 
         <br>
@@ -71,11 +103,17 @@
             });
             const data = await response.json();
 
-            if (data.enc_file) {
+            if (data.status === 'success') {
                 document.getElementById('e_sec').style.display = "block";
                 document.getElementById('e_img').src = "/static/uploads/" + data.noise_preview + "?t=" + new Date().getTime();
                 document.getElementById('dl_link').href = "/download/" + data.enc_file;
                 document.getElementById('dl_link').style.display = "block";
+
+                // تحديث وإظهار قيم الحساسية
+                document.getElementById('sensitivity_results').style.display = "block";
+                document.getElementById('npcr_val').innerText = data.npcr + "%";
+                document.getElementById('uaci_val').innerText = data.uaci + "%";
+
                 document.getElementById('ana_btn').style.display = "inline-block";
                 btn.innerText = "Encryption Verified";
             }
